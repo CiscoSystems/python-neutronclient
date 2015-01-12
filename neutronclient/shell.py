@@ -50,9 +50,9 @@ from neutronclient.neutron.v2_0.fw import firewall
 from neutronclient.neutron.v2_0.fw import firewallpolicy
 from neutronclient.neutron.v2_0.fw import firewallrule
 from neutronclient.neutron.v2_0.lb import healthmonitor as lb_healthmonitor
-#from neutronclient.neutron.v2_0.cisco import hostingdevice
-#rom neutronclient.neutron.v2_0.cisco import hostingdevicesheduler
-#rom neutronclient.neutron.v2_0.cisco import hostingdevicetemplate
+from neutronclient.neutron.v2_0.cisco import hostingdevice
+#from neutronclient.neutron.v2_0.cisco import hostingdevicesheduler
+from neutronclient.neutron.v2_0.cisco import hostingdevicetemplate
 from neutronclient.neutron.v2_0.lb import member as lb_member
 from neutronclient.neutron.v2_0.lb import pool as lb_pool
 from neutronclient.neutron.v2_0.lb import vip as lb_vip
@@ -254,11 +254,11 @@ COMMAND_V2 = {
     'cisco-credential-show': credential.ShowCredential,
     'cisco-credential-create': credential.CreateCredential,
     'cisco-credential-delete': credential.DeleteCredential,
-#    'cisco-hosting-device-list': hostingdevice.ListHostingDevice,
-#    'cisco-hosting-device-show': hostingdevice.ShowHostingDevice,
-#    'cisco-hosting-device-create': hostingdevice.CreateHostingDevice,
-#    'cisco-hosting-device-delete': hostingdevice.DeleteHostingDevice,
-#    'cisco-hosting-device-update': hostingdevice.UpdateHostingDevice,
+    'cisco-hosting-device-list': hostingdevice.ListHostingDevice,
+    'cisco-hosting-device-show': hostingdevice.ShowHostingDevice,
+    'cisco-hosting-device-create': hostingdevice.CreateHostingDevice,
+    'cisco-hosting-device-delete': hostingdevice.DeleteHostingDevice,
+    'cisco-hosting-device-update': hostingdevice.UpdateHostingDevice,
 #    'cisco-hosting-device-router-add':
 #        routerscheduler.AddRouterToHostingDevice,
 #    'cisco-hosting-device-router-remove':
@@ -267,16 +267,21 @@ COMMAND_V2 = {
 #        routerscheduler.ListRoutersOnHostingDevice,
 #    'cisco-hosting-device-list-for-router':
 #        routerscheduler.ListHostingDeviceHostingRouter,
-#    'cisco-hosting-device-template-list':
-#        hostingdevicetemplate.ListHostingDeviceTemplate,
-#    'cisco-hosting-device-template-show':
-#        hostingdevicetemplate.ShowHostingDeviceTemplate,
-#    'cisco-hosting-device-template-create':
-#        hostingdevicetemplate.CreateHostingDeviceTemplate,
-#    'cisco-hosting-device-template-delete':
-#        hostingdevicetemplate.DeleteHostingDeviceTemplate,
-#    'cisco-hosting-device-template-update':
-#        hostingdevicetemplate.UpdateHostingDeviceTemplate,
+    'cisco-hosting-device-template-list': (
+        hostingdevicetemplate.ListHostingDeviceTemplate
+    ),
+    'cisco-hosting-device-template-show': (
+        hostingdevicetemplate.ShowHostingDeviceTemplate
+    ),
+    'cisco-hosting-device-template-create': (
+        hostingdevicetemplate.CreateHostingDeviceTemplate
+    ),
+    'cisco-hosting-device-template-delete': (
+        hostingdevicetemplate.DeleteHostingDeviceTemplate
+    ),
+    'cisco-hosting-device-template-update': (
+        hostingdevicetemplate.UpdateHostingDeviceTemplate
+    ),
     'cisco-network-profile-list': networkprofile.ListNetworkProfile,
     'cisco-network-profile-show': networkprofile.ShowNetworkProfile,
     'cisco-network-profile-create': networkprofile.CreateNetworkProfile,
