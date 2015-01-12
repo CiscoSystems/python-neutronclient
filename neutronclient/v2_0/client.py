@@ -440,12 +440,12 @@ class Client(ClientBase):
     L3_DEVICES = '/l3-hosting-devices'
     HOSTING_DEVICES = '/hosting-devices'
     CFG_AGENTS = '/cfg-agents'
-    hosting_devices_path = "/hosting_devices"
-    hosting_device_path = "/hosting_devices/%s"
-    hosting_device_templates_path = "/hosting_device_templates"
-    hosting_device_template_path = "/hosting_device_templates/%s"
-    routertypes_path = "routertypes"
-    routertype_path = "routertype/%s"
+    hosting_devices_path = "/dev_mgr/hosting_devices"
+    hosting_device_path = "/dev_mgr/hosting_devices/%s"
+    hosting_device_templates_path = "/dev_mgr/hosting_device_templates"
+    hosting_device_template_path = "/dev_mgr/hosting_device_templates/%s"
+    routertypes_path = "/routertypes"
+    routertype_path = "/routertypes/%s"
 
     # API has no way to report plurals, so we have to hard code them
     EXTED_PLURALS = {'routers': 'router',
@@ -1764,8 +1764,9 @@ class Client(ClientBase):
     @APIParamsCall
     def list_hosting_device_templates(self, retrieve_all=True, **_params):
         """Fetch a list of all hosting device templates for a tenant."""
-        return self.list('hosting_devices', self.hosting_device_templates_path,
-                         retrieve_all, **_params)
+        return self.list('hosting_device_templates',
+                         self.hosting_device_templates_path, retrieve_all,
+                         **_params)
 
     @APIParamsCall
     def show_hosting_device_template(self, hosting_device_template_id,
