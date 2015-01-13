@@ -32,21 +32,23 @@ class AddRouterToHostingDevice(neutronV20.NeutronCommand):
         parser = super(AddRouterToHostingDevice, self).get_parser(prog_name)
         parser.add_argument(
             'hosting_device',
-            help=_('ID of the hosting device.'))
+            help=_('Name or id of the hosting device.'))
         parser.add_argument(
             'router',
-            help=_('Router to add.'))
+            help=_('Name or id of router to add.'))
         return parser
 
     def run(self, parsed_args):
         self.log.debug('run(%s)' % parsed_args)
         neutron_client = self.get_client()
         neutron_client.format = parsed_args.request_format
-        _id = neutronV20.find_resourceid_by_name_or_id(
+        _id_hd = neutronV20.find_resourceid_by_name_or_id(
+            neutron_client, 'hosting_device', parsed_args.hosting_device)
+        _id_r = neutronV20.find_resourceid_by_name_or_id(
             neutron_client, 'router', parsed_args.router)
-        neutron_client.add_router_to_hosting_device(parsed_args.hosting_device,
-                                              {'router_id': _id})
-        print(_('Added router %s to Hosting Device') % parsed_args.router,
+        neutron_client.add_router_to_hosting_device(_id_hd,
+                                                    {'router_id': _id_r})
+        print(_('Added router %s to hosting device') % parsed_args.router,
               file=self.app.stdout)
 
 
@@ -57,21 +59,22 @@ class RemoveRouterFromHostingDevice(neutronV20.NeutronCommand):
         parser = super(RemoveRouterFromHostingDevice, self).get_parser(prog_name)
         parser.add_argument(
             'hosting_device',
-            help=_('ID of the Hosting Device.'))
+            help=_('Name or id of the hosting device.'))
         parser.add_argument(
             'router',
-            help=_('Router to remove.'))
+            help=_('Name or id of router to remove.'))
         return parser
 
     def run(self, parsed_args):
         self.log.debug('run(%s)' % parsed_args)
         neutron_client = self.get_client()
         neutron_client.format = parsed_args.request_format
-        _id = neutronV20.find_resourceid_by_name_or_id(
+        _id_hd = neutronV20.find_resourceid_by_name_or_id(
+            neutron_client, 'hosting_device', parsed_args.hosting_device)
+        _id_r = neutronV20.find_resourceid_by_name_or_id(
             neutron_client, 'router', parsed_args.router)
-        neutron_client.remove_router_from_hosting_device(
-            parsed_args.hosting_device, _id)
-        print(_('Removed router %s from Hosting Device') % parsed_args.router,
+        neutron_client.remove_router_from_hosting_device(_id_hd, _id_r)
+        print(_('Removed router %s from hosting device') % parsed_args.router,
               file=self.app.stdout)
 
 
@@ -89,7 +92,7 @@ class ListRoutersOnHostingDevice(neutronV20.ListCommand):
                        self).get_parser(prog_name)
         parser.add_argument(
             'hosting_device',
-            help=_('ID of the Hosting Device to query.'))
+            help=_('Name or id of the hosting device to query.'))
         return parser
 
     def call_server(self, neutron_client, search_opts, parsed_args):
@@ -112,7 +115,7 @@ class ListHostingDeviceHostingRouter(neutronV20.ListCommand):
         parser = super(ListHostingDeviceHostingRouter,
                        self).get_parser(prog_name)
         parser.add_argument('router',
-                            help=_('Router to query.'))
+                            help=_('Name or id of router to query.'))
         return parser
 
     def extend_list(self, data, parsed_args):
