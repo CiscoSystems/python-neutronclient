@@ -80,7 +80,7 @@ from neutronclient.neutron.v2_0.qos import rule as qos_rule
 from neutronclient.neutron.v2_0 import quota
 from neutronclient.neutron.v2_0 import rbac
 from neutronclient.neutron.v2_0 import router
-#from neutronclient.neutron.v2_0.cisco import routerscheduler
+from neutronclient.neutron.v2_0.cisco import routerscheduler
 from neutronclient.neutron.v2_0.cisco import routertype
 from neutronclient.neutron.v2_0 import securitygroup
 from neutronclient.neutron.v2_0 import servicetype
@@ -327,14 +327,14 @@ COMMAND_V2 = {
     'cisco-hosting-device-create': hostingdevice.CreateHostingDevice,
     'cisco-hosting-device-delete': hostingdevice.DeleteHostingDevice,
     'cisco-hosting-device-update': hostingdevice.UpdateHostingDevice,
-#    'cisco-hosting-device-router-add':
-#        routerscheduler.AddRouterToHostingDevice,
-#    'cisco-hosting-device-router-remove':
-#        routerscheduler.RemoveRouterFromHostingDevice,
-#    'cisco-hosting-device-list-hosted-routers':
-#        routerscheduler.ListRoutersOnHostingDevice,
-#    'cisco-hosting-device-list-for-router':
-#        routerscheduler.ListHostingDeviceHostingRouter,
+    'cisco-hosting-device-router-add':
+        routerscheduler.AddRouterToHostingDevice,
+    'cisco-hosting-device-router-remove':
+        routerscheduler.RemoveRouterFromHostingDevice,
+    'cisco-hosting-device-list-hosted-routers':
+        routerscheduler.ListRoutersOnHostingDevice,
+    'cisco-hosting-device-list-for-router':
+        routerscheduler.ListHostingDeviceHostingRouter,
     'cisco-hosting-device-template-list': (
         hostingdevicetemplate.ListHostingDeviceTemplate
     ),
