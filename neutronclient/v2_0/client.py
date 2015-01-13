@@ -231,7 +231,7 @@ class Client(object):
     net_partitions_path = "/net-partitions"
     net_partition_path = "/net-partitions/%s"
 
-    L3_ROUTER_DEVICES = '/l3-router-device'
+    L3_ROUTER_DEVICES = '/l3-router-devices'
     L3_DEVICES = '/l3-hosting-devices'
     HOSTING_DEVICES = '/hosting-devices'
     CFG_AGENTS = '/cfg-agents'
@@ -1304,20 +1304,20 @@ class Client(object):
     @APIParamsCall
     def list_routers_on_hosting_device(self, hosting_device_id, **_params):
         """Fetches a list of hosting devices hosting a router."""
-        return self.get((self.agent_path + self.L3_ROUTER_DEVICES) %
+        return self.get((self.hosting_device_path + self.L3_ROUTER_DEVICES) %
                         hosting_device_id, params=_params)
 
     @APIParamsCall
     def add_router_to_hosting_device(self, hosting_device_id, body):
         """Adds a router to hosting device."""
-        return self.post((self.agent_path + self.L3_ROUTER_DEVICES) %
+        return self.post((self.hosting_device_path + self.L3_ROUTER_DEVICES) %
                          hosting_device_id, body=body)
 
     @APIParamsCall
     def remove_router_from_hosting_device(self, hosting_device_id, router_id):
         """Remove a router from hosting_device."""
-        return self.delete((self.agent_path + self.L3_ROUTER_DEVICES + "/%s") %
-                           (hosting_device_id, router_id))
+        return self.delete((self.hosting_device_path + self.L3_ROUTER_DEVICES
+                            + "/%s") % (hosting_device_id, router_id))
 
     @APIParamsCall
     def list_config_agents_handling_hosting_device(self, hosting_device_id,

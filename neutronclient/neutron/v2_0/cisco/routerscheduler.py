@@ -93,17 +93,19 @@ class ListRoutersOnHostingDevice(neutronV20.ListCommand):
         return parser
 
     def call_server(self, neutron_client, search_opts, parsed_args):
-        data = neutron_client.list_routers_on_hosting_device(
-            parsed_args.hosting_device, **search_opts)
+        _id = neutronV20.find_resourceid_by_name_or_id(
+            neutron_client, 'hosting_device', parsed_args.hosting_device)
+        data = neutron_client.list_routers_on_hosting_device(_id,
+                                                             **search_opts)
         return data
 
 
 class ListHostingDeviceHostingRouter(neutronV20.ListCommand):
-    """List L3 agents hosting a router."""
+    """List hosting devices hosting a router."""
 
-    resource = 'agent'
+    resource = 'hosting_device'
     _formatters = {}
-    list_columns = ['id', 'host', 'admin_state_up', 'alive']
+    list_columns = ['id', 'status', 'admin_state_up']
     unknown_parts_flag = False
 
     def get_parser(self, prog_name):
@@ -114,13 +116,15 @@ class ListHostingDeviceHostingRouter(neutronV20.ListCommand):
         return parser
 
     def extend_list(self, data, parsed_args):
-        for agent in data:
-            agent['alive'] = ":-)" if agent['alive'] else 'xxx'
+        pass
+ #       for agent in data:
+ #          agent['alive'] = ":-)" if agent['alive'] else 'xxx'
 
     def call_server(self, neutron_client, search_opts, parsed_args):
         _id = neutronV20.find_resourceid_by_name_or_id(neutron_client,
                                                        'router',
                                                        parsed_args.router)
         search_opts['router'] = _id
-        data = neutron_client.list_hosting_devices_hosting_routers(**search_opts)
+        data = neutron_client.list_hosting_devices_hosting_routers(
+            search_opts['router'], **search_opts)
         return data
