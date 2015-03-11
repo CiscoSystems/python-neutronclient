@@ -140,7 +140,8 @@ class ListSecurityGroupRule(neutronV20.ListCommand):
         sec_group_ids = set()
         for rule in data:
             for key in self.replace_rules:
-                sec_group_ids.add(rule[key])
+                if rule.get(key):
+                    sec_group_ids.add(rule[key])
         search_opts.update({"id": sec_group_ids})
         secgroups = neutron_client.list_security_groups(**search_opts)
         secgroups = secgroups.get('security_groups', [])
