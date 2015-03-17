@@ -189,13 +189,8 @@ class CLITestV20SecurityGroupsJSON(test_cli20.CLITestV20Base):
                                                         mox.IgnoreArg())
         self._test_list_resources(resources, cmd, True)
 
-    def _test_extend_list(self, mox_calls):
+    def _test_extend_list(self, mox_calls, data):
         resources = "security_groups"
-
-        data = [{'name': 'default',
-                 'security_group_id': 'secgroupid%02d' % i,
-                 'remote_group_id': 'remgroupid%02d' % i}
-                for i in range(10)]
 
         cmd = securitygroup.ListSecurityGroupRule(
             test_cli20.MyApp(sys.stdout), None)
@@ -226,8 +221,9 @@ class CLITestV20SecurityGroupsJSON(test_cli20.CLITestV20Base):
         sec_group_ids = set()
         for rule in data:
             for key in replace_rules:
-                sec_group_ids.add(rule[key])
-                response.append({'id': rule[key], 'name': 'default'})
+                if rule.get(key):
+                    sec_group_ids.add(rule[key])
+                    response.append({'id': rule[key], 'name': 'default'})
         sec_group_ids = list(sec_group_ids)
 
         result = []
@@ -260,12 +256,17 @@ class CLITestV20SecurityGroupsJSON(test_cli20.CLITestV20Base):
                     'X-Auth-Token', test_cli20.TOKEN)).AndReturn(
                         responses[0]['response'])
 
-        self._test_extend_list(mox_calls)
+        data = [{'name': 'default',
+                 'remote_group_id': 'remgroupid%02d' % i}
+                for i in range(10)]
+        data.append({'name': 'default', 'remote_group_id': None})
+        self._test_extend_list(mox_calls, data)
 
     def test_extend_list_exceed_max_uri_len(self):
         def mox_calls(path, data):
             # 1 char of extra URI len will cause a split in 2 requests
-            self.mox.StubOutWithMock(self.client, '_check_uri_length')
+            self.mox.StubOutWithMock(self.client,
+                                     '_check_uri_length')
             self.client._check_uri_length(mox.IgnoreArg()).AndRaise(
                 exceptions.RequestURITooLong(excess=1))
             responses = self._build_test_data(data, excess=1)
@@ -281,7 +282,14 @@ class CLITestV20SecurityGroupsJSON(test_cli20.CLITestV20Base):
                         'X-Auth-Token', test_cli20.TOKEN)).AndReturn(
                             item['response'])
 
-        self._test_extend_list(mox_calls)
+        data = [{'name': 'default',
+                 'security_group_id': 'secgroupid%02d' % i,
+                 'remote_group_id': 'remgroupid%02d' % i}
+                for i in range(10)]
+        data.append({'name': 'default',
+                     'security_group_id': 'secgroupid10',
+                     'remote_group_id': None})
+        self._test_extend_list(mox_calls, data)
 
     def test_list_security_group_rules_pagination(self):
         resources = "security_group_rules"

@@ -91,10 +91,14 @@ class MyUrlComparator(mox.Comparator):
         lhsp = urlparse.urlparse(self.lhs)
         rhsp = urlparse.urlparse(rhs)
 
+        lhs_qs = urlparse.parse_qsl(lhsp.query)
+        rhs_qs = urlparse.parse_qsl(rhsp.query)
+
         return (lhsp.scheme == rhsp.scheme and
                 lhsp.netloc == rhsp.netloc and
                 lhsp.path == rhsp.path and
-                urlparse.parse_qs(lhsp.query) == urlparse.parse_qs(rhsp.query))
+                len(lhs_qs) == len(rhs_qs) and
+                set(lhs_qs) == set(rhs_qs))
 
     def __str__(self):
         if self.client and self.client.format != FORMAT:
@@ -177,11 +181,6 @@ class CLITestV20Base(base.BaseTestCase):
 
     def _get_attr_metadata(self):
         return self.metadata
-        client.Client.EXTED_PLURALS.update(constants.PLURALS)
-        client.Client.EXTED_PLURALS.update({'tags': 'tag'})
-        return {'plurals': client.Client.EXTED_PLURALS,
-                'xmlns': constants.XML_NS_V20,
-                constants.EXT_NS: {'prefix': 'http://xxxx.yy.com'}}
 
     def setUp(self, plurals=None):
         """Prepare the test environment."""
@@ -222,7 +221,8 @@ class CLITestV20Base(base.BaseTestCase):
                                       'credential', 'network_profile',
                                       'policy_profile', 'ikepolicy',
                                       'ipsecpolicy', 'metering_label',
-                                      'metering_label_rule', 'net_partition']
+                                      'metering_label_rule', 'net_partition',
+                                      'fox_socket']
         if not cmd_resource:
             cmd_resource = resource
         if (resource in non_admin_status_resources):
@@ -304,7 +304,7 @@ class CLITestV20Base(base.BaseTestCase):
                              fields_1=(), fields_2=(), page_size=None,
                              sort_key=(), sort_dir=(), response_contents=None,
                              base_args=None, path=None, cmd_resources=None,
-                             parent_id=None):
+                             parent_id=None, output_format=None):
         self.mox.StubOutWithMock(cmd, "get_client")
         self.mox.StubOutWithMock(self.client.httpclient, "request")
         cmd.get_client().MultipleTimes().AndReturn(self.client)
@@ -383,6 +383,9 @@ class CLITestV20Base(base.BaseTestCase):
             path = getattr(self.client, cmd_resources + "_path")
             if parent_id:
                 path = path % parent_id
+        if output_format:
+            args.append('-f')
+            args.append(output_format)
         self.client.httpclient.request(
             MyUrlComparator(end_url(path, query, format=self.format),
                             self.client),
@@ -401,6 +404,7 @@ class CLITestV20Base(base.BaseTestCase):
         return _str
 
     def _test_list_resources_with_pagination(self, resources, cmd,
+                                             base_args=None,
                                              cmd_resources=None,
                                              parent_id=None):
         self.mox.StubOutWithMock(cmd, "get_client")
@@ -435,7 +439,8 @@ class CLITestV20Base(base.BaseTestCase):
                 'X-Auth-Token', TOKEN)).AndReturn((MyResp(200), resstr2))
         self.mox.ReplayAll()
         cmd_parser = cmd.get_parser("list_" + cmd_resources)
-        args = ['--request-format', self.format]
+        args = base_args if base_args is not None else []
+        args.extend(['--request-format', self.format])
         shell.run_command(cmd, cmd_parser, args)
         self.mox.VerifyAll()
         self.mox.UnsetStubs()
@@ -616,6 +621,17 @@ class ClientV2TestJson(CLITestV20Base):
         self.assertEqual("An error", str(error))
         self.mox.VerifyAll()
         self.mox.UnsetStubs()
+
+    def test_do_request_with_long_uri_exception(self):
+        long_string = 'x' * 8200                  # 8200 > MAX_URI_LEN:8192
+        params = {'id': long_string}
+
+        try:
+            self.client.do_request('GET', '/test', body='', params=params)
+        except exceptions.RequestURITooLong as cm:
+            self.assertNotEqual(cm.excess, 0)
+        else:
+            self.fail('Expected exception NOT raised')
 
 
 class ClientV2UnicodeTestXML(ClientV2TestJson):

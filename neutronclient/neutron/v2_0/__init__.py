@@ -411,7 +411,11 @@ class NeutronCommand(command.OpenStackCommand):
 
         return parser
 
+    def cleanup_output_data(self, data):
+        pass
+
     def format_output_data(self, data):
+        self.cleanup_output_data(data)
         # Modify data to make it more readable
         if self.resource in data:
             for k, v in six.iteritems(data[self.resource]):
@@ -427,6 +431,9 @@ class NeutronCommand(command.OpenStackCommand):
                     data[self.resource][k] = ''
 
     def add_known_arguments(self, parser):
+        pass
+
+    def set_extra_attrs(self, parsed_args):
         pass
 
     def args2body(self, parsed_args):
@@ -452,6 +459,7 @@ class CreateCommand(NeutronCommand, show.ShowOne):
 
     def get_data(self, parsed_args):
         self.log.debug('get_data(%s)' % parsed_args)
+        self.set_extra_attrs(parsed_args)
         neutron_client = self.get_client()
         neutron_client.format = parsed_args.request_format
         _extra_values = parse_args_to_dict(self.values_specs)
@@ -484,14 +492,19 @@ class UpdateCommand(NeutronCommand):
 
     def get_parser(self, prog_name):
         parser = super(UpdateCommand, self).get_parser(prog_name)
+        if self.allow_names:
+            help_str = _('ID or name of %s to update.')
+        else:
+            help_str = _('ID of %s to update.')
         parser.add_argument(
             'id', metavar=self.resource.upper(),
-            help=_('ID or name of %s to update.') % self.resource)
+            help=help_str % self.resource)
         self.add_known_arguments(parser)
         return parser
 
     def run(self, parsed_args):
         self.log.debug('run(%s)', parsed_args)
+        self.set_extra_attrs(parsed_args)
         neutron_client = self.get_client()
         neutron_client.format = parsed_args.request_format
         _extra_values = parse_args_to_dict(self.values_specs)
@@ -509,7 +522,7 @@ class UpdateCommand(NeutronCommand):
         if self.allow_names:
             _id = find_resourceid_by_name_or_id(
                 neutron_client, self.resource, parsed_args.id,
-                cmd_resource=self.cmd_resource)
+                cmd_resource=self.cmd_resource, parent_id=self.parent_id)
         else:
             _id = find_resourceid_by_id(
                 neutron_client, self.resource, parsed_args.id,
@@ -542,10 +555,12 @@ class DeleteCommand(NeutronCommand):
         parser.add_argument(
             'id', metavar=self.resource.upper(),
             help=help_str % self.resource)
+        self.add_known_arguments(parser)
         return parser
 
     def run(self, parsed_args):
         self.log.debug('run(%s)', parsed_args)
+        self.set_extra_attrs(parsed_args)
         neutron_client = self.get_client()
         neutron_client.format = parsed_args.request_format
         obj_deleter = getattr(neutron_client,
@@ -589,6 +604,7 @@ class ListCommand(NeutronCommand, lister.Lister):
             add_pagination_argument(parser)
         if self.sorting_support:
             add_sorting_argument(parser)
+        self.add_known_arguments(parser)
         return parser
 
     def args2search_opts(self, parsed_args):
@@ -660,20 +676,18 @@ class ListCommand(NeutronCommand, lister.Lister):
             # both list_columns and returned resource.
             # Also Keep their order the same as in list_columns
             _columns = [x for x in self.list_columns if x in _columns]
+
+        formatters = self._formatters
+        if hasattr(self, '_formatters_csv') and parsed_args.formatter == 'csv':
+            formatters = self._formatters_csv
+
         return (_columns, (utils.get_item_properties(
-            s, _columns, formatters=self._formatters, )
+            s, _columns, formatters=formatters, )
             for s in info), )
-        if parsed_args.formatter == 'csv':
-            return (_columns, (utils.get_item_properties(
-                s, _columns, formatters=self._formatters_csv)
-                for s in info),)
-        else:
-            return (_columns, (utils.get_item_properties(
-                s, _columns, formatters=self._formatters)
-                for s in info),)
 
     def get_data(self, parsed_args):
         self.log.debug('get_data(%s)', parsed_args)
+        self.set_extra_attrs(parsed_args)
         data = self.retrieve_list(parsed_args)
         self.extend_list(data, parsed_args)
         return self.setup_columns(data, parsed_args)
@@ -696,10 +710,12 @@ class ShowCommand(NeutronCommand, show.ShowOne):
         parser.add_argument(
             'id', metavar=self.resource.upper(),
             help=help_str % self.resource)
+        self.add_known_arguments(parser)
         return parser
 
     def get_data(self, parsed_args):
         self.log.debug('get_data(%s)', parsed_args)
+        self.set_extra_attrs(parsed_args)
         neutron_client = self.get_client()
         neutron_client.format = parsed_args.request_format
 

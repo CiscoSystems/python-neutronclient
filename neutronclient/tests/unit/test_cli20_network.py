@@ -72,6 +72,24 @@ class CLITestV20NetworkJSON(test_cli20.CLITestV20Base):
                                    position_names, position_values,
                                    tenant_id='tenantid')
 
+    def test_create_network_provider_args(self):
+        """Create net: with --provider arguments."""
+        resource = 'network'
+        cmd = network.CreateNetwork(test_cli20.MyApp(sys.stdout), None)
+        name = 'myname'
+        myid = 'myid'
+
+        # Test --provider attributes before network name
+        args = ['--provider:network_type', 'vlan',
+                '--provider:physical_network', 'physnet1',
+                '--provider:segmentation_id', '400', name]
+        position_names = ['provider:network_type',
+                          'provider:physical_network',
+                          'provider:segmentation_id', 'name']
+        position_values = ['vlan', 'physnet1', '400', name]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
     def test_create_network_tags(self):
         """Create net: myname --tags a b."""
         resource = 'network'
@@ -84,6 +102,20 @@ class CLITestV20NetworkJSON(test_cli20.CLITestV20Base):
         self._test_create_resource(resource, cmd, name, myid, args,
                                    position_names, position_values,
                                    tags=['a', 'b'])
+
+    def test_create_network_external(self):
+        """Create net: --router:external myname."""
+        resource = 'network'
+        cmd = network.CreateNetwork(test_cli20.MyApp(sys.stdout), None)
+        name = 'myname'
+        myid = 'myid'
+        args = [name, '--router:external']
+        position_names = ['name', ]
+        position_values = [name, ]
+        external = {'router:external': True}
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values,
+                                   **external)
 
     def test_create_network_state(self):
         """Create net: --admin_state_down myname."""
@@ -519,13 +551,15 @@ class CLITestV20NetworkJSON(test_cli20.CLITestV20Base):
             filters, response = self._build_test_data(data)
 
             # 1 char of extra URI len will cause a split in 2 requests
-            self.mox.StubOutWithMock(self.client, "_check_uri_length")
+            self.mox.StubOutWithMock(self.client,
+                                     "_check_uri_length")
             self.client._check_uri_length(mox.IgnoreArg()).AndRaise(
                 exceptions.RequestURITooLong(excess=1))
 
             for data in sub_data_lists:
                 filters, response = self._build_test_data(data)
-                self.client._check_uri_length(mox.IgnoreArg()).AndReturn(None)
+                self.client._check_uri_length(
+                    mox.IgnoreArg()).AndReturn(None)
                 self.client.httpclient.request(
                     test_cli20.MyUrlComparator(
                         test_cli20.end_url(
