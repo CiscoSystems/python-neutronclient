@@ -668,6 +668,12 @@ class Client(ClientBase):
                         "/remove_router_interface", body=body)
 
     @APIParamsCall
+    def get_router_interfaces(self, router, body=None):
+        """Gets the router interfaces of a specified router."""
+        return self.get((self.router_path % router) +
+                        "/get_router_interfaces", body=body)
+
+    @APIParamsCall
     def add_gateway_router(self, router, body=None):
         """Adds an external network gateway to the specified router."""
         return self.put((self.router_path % router),
