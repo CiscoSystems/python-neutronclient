@@ -154,7 +154,7 @@ COMMAND_V2 = {
     'ext-list': extension.ListExt,
     'ext-show': extension.ShowExt,
     'router-list': router.ListRouter,
-    'router-port-list': port.ListRouterPort,
+    'router-port-list': router.GetRouterInterfaceCommand,
     'router-show': router.ShowRouter,
     'router-create': router.CreateRouter,
     'router-delete': router.DeleteRouter,

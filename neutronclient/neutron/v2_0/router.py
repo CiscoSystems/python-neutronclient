@@ -167,6 +167,35 @@ class RemoveInterfaceRouter(RouterInterfaceCommand):
         return _('Removed interface from router %s.') % router_id
 
 
+class GetRouterInterfaceCommand(neutronV20.ListCommand):
+    """Get the attached interfaces of a router."""
+    resource = 'routerport'
+
+    from neutronclient.neutron.v2_0 import port
+    _formatters = {'fixed_ips': port._format_fixed_ips, }
+    list_columns = ['id', 'name', 'mac_address', 'fixed_ips']
+    pagination_support = True
+    sorting_support = True
+
+    def get_parser(self, prog_name):
+        parser = super(GetRouterInterfaceCommand, self).get_parser(prog_name)
+        parser.add_argument(
+            'router', metavar='ROUTER',
+            help=_('ID or name of the router.'))
+        return parser
+
+    def call_server(self, neutron_client, search_opts, parsed_args):
+        _router_id = neutronV20.find_resourceid_by_name_or_id(
+            neutron_client, 'router', parsed_args.router)
+        data = neutron_client.get_router_interfaces(
+            _router_id, **search_opts)
+        # Instead of a list of routerports (as the list command expects) we
+        # get a list of dicts with keys 'type' and 'port'. We extract the
+        # ports and create a list of ports for further processing.
+        data = [p['port'] for p in data.get('routerports')]
+        return {'routerports': data}
+
+
 class SetGatewayRouter(neutronV20.NeutronCommand):
     """Set the external network gateway for a router."""
 
