@@ -113,6 +113,85 @@ class CLITestV20PortJSON(test_cli20.CLITestV20Base):
         self._test_create_resource(resource, cmd, name, myid, args,
                                    position_names, position_values)
 
+    def test_create_port_vnic_type_normal(self):
+        """Create port: --vnic_type normal netid."""
+        resource = 'port'
+        cmd = port.CreatePort(test_cli20.MyApp(sys.stdout), None)
+        name = 'myname'
+        myid = 'myid'
+        netid = 'netid'
+        args = ['--vnic_type', 'normal', netid]
+        position_names = ['binding:vnic_type', 'network_id']
+        position_values = ['normal', netid]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
+        # Test dashed options
+        args = ['--vnic-type', 'normal', netid]
+        position_names = ['binding:vnic_type', 'network_id']
+        position_values = ['normal', netid]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
+    def test_create_port_vnic_type_direct(self):
+        """Create port: --vnic_type direct netid."""
+        resource = 'port'
+        cmd = port.CreatePort(test_cli20.MyApp(sys.stdout), None)
+        name = 'myname'
+        myid = 'myid'
+        netid = 'netid'
+        args = ['--vnic_type', 'direct', netid]
+        position_names = ['binding:vnic_type', 'network_id']
+        position_values = ['direct', netid]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
+        # Test dashed options
+        args = ['--vnic-type', 'direct', netid]
+        position_names = ['binding:vnic_type', 'network_id']
+        position_values = ['direct', netid]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
+    def test_create_port_vnic_type_macvtap(self):
+        """Create port: --vnic_type macvtap netid."""
+        resource = 'port'
+        cmd = port.CreatePort(test_cli20.MyApp(sys.stdout), None)
+        name = 'myname'
+        myid = 'myid'
+        netid = 'netid'
+        args = ['--vnic_type', 'macvtap', netid]
+        position_names = ['binding:vnic_type', 'network_id']
+        position_values = ['macvtap', netid]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
+        # Test dashed options
+        args = ['--vnic-type', 'macvtap', netid]
+        position_names = ['binding:vnic_type', 'network_id']
+        position_values = ['macvtap', netid]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
+    def test_create_port_with_binding_profile(self):
+        resource = 'port'
+        cmd = port.CreatePort(test_cli20.MyApp(sys.stdout), None)
+        name = 'myname'
+        myid = 'myid'
+        netid = 'netid'
+        args = ['--binding_profile', '{"foo":"bar"}', netid]
+        position_names = ['binding:profile', 'network_id']
+        position_values = [{'foo': 'bar'}, netid]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
+        # Test dashed options
+        args = ['--binding-profile', '{"foo":"bar"}', netid]
+        position_names = ['binding:profile', 'network_id']
+        position_values = [{'foo': 'bar'}, netid]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
     def test_create_port_tenant(self):
         """Create port: --tenant_id tenantid netid."""
         resource = 'port'
@@ -206,6 +285,20 @@ class CLITestV20PortJSON(test_cli20.CLITestV20Base):
         args = [netid, '--security-groups', 'list=true', 'sg_id1', 'sg_id2']
         position_names = ['network_id', 'security_groups']
         position_values = [netid, ['sg_id1', 'sg_id2']]
+        self._test_create_resource(resource, cmd, name, myid, args,
+                                   position_names, position_values)
+
+    def test_create_port_with_qos_policy(self):
+        """Create port: --qos-policy mypolicy."""
+        resource = 'port'
+        cmd = port.CreatePort(test_cli20.MyApp(sys.stdout), None)
+        name = 'myname'
+        myid = 'myid'
+        netid = 'netid'
+        qos_policy_name = 'mypolicy'
+        args = [netid, '--qos-policy', qos_policy_name]
+        position_names = ['network_id', 'qos_policy_id']
+        position_values = [netid, qos_policy_name]
         self._test_create_resource(resource, cmd, name, myid, args,
                                    position_names, position_values)
 
@@ -459,6 +552,22 @@ class CLITestV20PortJSON(test_cli20.CLITestV20Base):
                                               'ip_version': '4'}]}
         cmd = port.UpdatePort(test_cli20.MyApp(sys.stdout), None)
         self._test_update_resource(resource, cmd, myid, args, updatedfields)
+
+    def test_update_port_with_qos_policy(self):
+        """Update port: myid --qos-policy mypolicy."""
+        resource = 'port'
+        cmd = port.UpdatePort(test_cli20.MyApp(sys.stdout), None)
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--qos-policy', 'mypolicy'],
+                                   {'qos_policy_id': 'mypolicy', })
+
+    def test_update_port_with_no_qos_policy(self):
+        """Update port: myid --no-qos-policy."""
+        resource = 'port'
+        cmd = port.UpdatePort(test_cli20.MyApp(sys.stdout), None)
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--no-qos-policy'],
+                                   {'qos_policy_id': None, })
 
     def test_delete_extra_dhcp_opts_from_port(self):
         resource = 'port'

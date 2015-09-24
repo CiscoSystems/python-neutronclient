@@ -108,48 +108,20 @@ class SimpleReadOnlyNeutronClientTest(base.ClientTestBase):
 
     def test_neutron_security_group_list(self):
         security_grp = self.parser.listing(self.neutron('security-group-list'))
-        self.assertTableStruct(security_grp, ['id', 'name', 'description'])
+        self.assertTableStruct(security_grp, ['id', 'name',
+                                              'security_group_rules'])
 
     def test_neutron_security_group_rule_list(self):
         security_grp = self.parser.listing(self.neutron
                                            ('security-group-rule-list'))
         self.assertTableStruct(security_grp, ['id', 'security_group',
-                                              'direction', 'protocol',
-                                              'remote_ip_prefix',
-                                              'remote_group'])
+                                              'direction', 'ethertype',
+                                              'protocol/port', 'remote'])
 
     def test_neutron_subnet_list(self):
         subnet_list = self.parser.listing(self.neutron('subnet-list'))
         self.assertTableStruct(subnet_list, ['id', 'name', 'cidr',
                                              'allocation_pools'])
-
-    def test_neutron_vpn_ikepolicy_list(self):
-        ikepolicy = self.parser.listing(self.neutron('vpn-ikepolicy-list'))
-        self.assertTableStruct(ikepolicy, ['id', 'name',
-                                           'auth_algorithm',
-                                           'encryption_algorithm',
-                                           'ike_version', 'pfs'])
-
-    def test_neutron_vpn_ipsecpolicy_list(self):
-        ipsecpolicy = self.parser.listing(self.neutron('vpn-ipsecpolicy-list'))
-        self.assertTableStruct(ipsecpolicy, ['id', 'name',
-                                             'auth_algorithm',
-                                             'encryption_algorithm',
-                                             'pfs'])
-
-    def test_neutron_vpn_service_list(self):
-        vpn_list = self.parser.listing(self.neutron('vpn-service-list'))
-        self.assertTableStruct(vpn_list, ['id', 'name',
-                                          'router_id', 'status'])
-
-    def test_neutron_ipsec_site_connection_list(self):
-        ipsec_site = self.parser.listing(self.neutron
-                                         ('ipsec-site-connection-list'))
-        self.assertTableStruct(ipsec_site, ['id', 'name',
-                                            'peer_address',
-                                            'peer_cidrs',
-                                            'route_mode',
-                                            'auth_mode', 'status'])
 
     def test_neutron_firewall_list(self):
         firewall_list = self.parser.listing(self.neutron

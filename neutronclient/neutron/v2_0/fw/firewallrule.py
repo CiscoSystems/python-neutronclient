@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 #
-# @author: KC Wang, Big Switch Networks
-#
 
 import argparse
 
@@ -106,7 +104,7 @@ class CreateFirewallRule(neutronv20.CreateCommand):
         parser.add_argument(
             '--action',
             required=True,
-            choices=['allow', 'deny'],
+            choices=['allow', 'deny', 'reject'],
             help=_('Action for the firewall rule.'))
 
     def args2body(self, parsed_args):

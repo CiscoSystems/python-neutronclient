@@ -3,9 +3,6 @@
 # Copyright 2015 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved
 #
-# Author: Ilya Shakhat, Mirantis Inc.
-# Author: Craig Tracey <craigtracey@gmail.com>
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -103,7 +100,7 @@ class CreatePool(neutronV20.CreateCommand):
         }
         neutronV20.update_dict(parsed_args, body[self.resource],
                                ['description', 'name',
-                                'session_persistence'])
+                                'session_persistence', 'tenant_id'])
         return body
 
 

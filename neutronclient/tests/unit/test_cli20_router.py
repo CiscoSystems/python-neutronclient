@@ -154,6 +154,48 @@ class CLITestV20RouterJSON(test_cli20.CLITestV20Base):
                                    {'name': 'myname'}
                                    )
 
+    def test_update_router_admin_state(self):
+        """Update router: myid --admin-state-up <True|False>."""
+        resource = 'router'
+        cmd = router.UpdateRouter(test_cli20.MyApp(sys.stdout), None)
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--admin-state-up', 'True'],
+                                   {'admin_state_up': 'True'}
+                                   )
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--admin-state-up', 'true'],
+                                   {'admin_state_up': 'true'}
+                                   )
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--admin-state-up', 'False'],
+                                   {'admin_state_up': 'False'}
+                                   )
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--admin-state-up', 'false'],
+                                   {'admin_state_up': 'false'}
+                                   )
+
+    def test_update_router_distributed(self):
+        """Update router: myid --distributed <True|False>."""
+        resource = 'router'
+        cmd = router.UpdateRouter(test_cli20.MyApp(sys.stdout), None)
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--distributed', 'True'],
+                                   {'distributed': 'True'}
+                                   )
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--distributed', 'true'],
+                                   {'distributed': 'true'}
+                                   )
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--distributed', 'False'],
+                                   {'distributed': 'False'}
+                                   )
+        self._test_update_resource(resource, cmd, 'myid',
+                                   ['myid', '--distributed', 'false'],
+                                   {'distributed': 'false'}
+                                   )
+
     def test_delete_router(self):
         """Delete router: myid."""
         resource = 'router'
@@ -242,6 +284,32 @@ class CLITestV20RouterJSON(test_cli20.CLITestV20Base):
                                    {"external_gateway_info":
                                     {"network_id": "externalid",
                                      "enable_snat": False}}
+                                   )
+
+    def test_set_gateway_external_ip(self):
+        """set external gateway for router: myid externalid --fixed-ip ..."""
+        resource = 'router'
+        cmd = router.SetGatewayRouter(test_cli20.MyApp(sys.stdout), None)
+        args = ['myid', 'externalid', '--fixed-ip', 'ip_address=10.0.0.2']
+        self._test_update_resource(resource, cmd, 'myid',
+                                   args,
+                                   {"external_gateway_info":
+                                    {"network_id": "externalid",
+                                     "external_fixed_ips": [
+                                         {"ip_address": "10.0.0.2"}]}}
+                                   )
+
+    def test_set_gateway_external_subnet(self):
+        """set external gateway for router: myid externalid --fixed-ip ..."""
+        resource = 'router'
+        cmd = router.SetGatewayRouter(test_cli20.MyApp(sys.stdout), None)
+        args = ['myid', 'externalid', '--fixed-ip', 'subnet_id=mysubnet']
+        self._test_update_resource(resource, cmd, 'myid',
+                                   args,
+                                   {"external_gateway_info":
+                                    {"network_id": "externalid",
+                                     "external_fixed_ips": [
+                                         {"subnet_id": "mysubnet"}]}}
                                    )
 
     def test_remove_gateway(self):

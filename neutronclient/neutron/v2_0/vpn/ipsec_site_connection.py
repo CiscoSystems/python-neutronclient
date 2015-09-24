@@ -13,10 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 #
-# @author: Swaminathan Vasudevan, Hewlett-Packard.
-#
 
-from oslo.serialization import jsonutils
+from oslo_serialization import jsonutils
 
 from neutronclient.common import exceptions
 from neutronclient.common import utils

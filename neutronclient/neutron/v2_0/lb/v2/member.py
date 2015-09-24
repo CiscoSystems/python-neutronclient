@@ -3,9 +3,6 @@
 # Copyright 2015 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved
 #
-# Author: Ilya Shakhat, Mirantis Inc.
-# Author: Craig Tracey <craigtracey@gmail.com>
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -41,7 +38,7 @@ class LbaasMemberMixin(object):
 
 
 class ListMember(LbaasMemberMixin, neutronV20.ListCommand):
-    """LBaaS v2 List members that belong to a given tenant."""
+    """LBaaS v2 List members that belong to a given pool."""
 
     resource = 'member'
     shadow_resource = 'lbaas_member'
@@ -51,6 +48,11 @@ class ListMember(LbaasMemberMixin, neutronV20.ListCommand):
     ]
     pagination_support = True
     sorting_support = True
+
+    def get_data(self, parsed_args):
+        self.parent_id = _get_pool_id(self.get_client(), parsed_args.pool)
+        self.values_specs.append('--pool_id=%s' % self.parent_id)
+        return super(ListMember, self).get_data(parsed_args)
 
 
 class ShowMember(LbaasMemberMixin, neutronV20.ShowCommand):
@@ -104,7 +106,7 @@ class CreateMember(neutronV20.CreateCommand):
             },
         }
         neutronV20.update_dict(parsed_args, body[self.resource],
-                               ['weight', 'subnet_id'])
+                               ['weight', 'subnet_id', 'tenant_id'])
         return body
 
 

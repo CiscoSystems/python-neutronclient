@@ -19,10 +19,11 @@
 
 import argparse
 import logging
+import netaddr
 import os
 
-from oslo.utils import encodeutils
-from oslo.utils import importutils
+from oslo_utils import encodeutils
+from oslo_utils import importutils
 import six
 
 from neutronclient.common import exceptions
@@ -104,9 +105,15 @@ def str2dict(strdict):
 
     :param strdict: key1=value1,key2=value2
     """
-    if not strdict:
-        return {}
-    return dict([kv.split('=', 1) for kv in strdict.split(',')])
+    result = {}
+    if strdict:
+        for kv in strdict.split(','):
+            key, sep, value = kv.partition('=')
+            if not sep:
+                msg = _("invalid key-value '%s', expected format: key=value")
+                raise argparse.ArgumentTypeError(msg % kv)
+            result[key] = value
+    return result
 
 
 def http_log_req(_logger, args, kwargs):
@@ -127,13 +134,13 @@ def http_log_req(_logger, args, kwargs):
     if 'body' in kwargs and kwargs['body']:
         string_parts.append(" -d '%s'" % (kwargs['body']))
     req = encodeutils.safe_encode("".join(string_parts))
-    _logger.debug("\nREQ: %s\n", req)
+    _logger.debug("REQ: %s", req)
 
 
 def http_log_resp(_logger, resp, body):
     if not _logger.isEnabledFor(logging.DEBUG):
         return
-    _logger.debug("RESP:%(code)s %(headers)s %(body)s\n",
+    _logger.debug("RESP: %(code)s %(headers)s %(body)s",
                   {'code': resp.status_code,
                    'headers': resp.headers,
                    'body': body})
@@ -171,3 +178,11 @@ def add_boolean_argument(parser, name, **kwargs):
         choices=['True', 'true', 'False', 'false'],
         default=default,
         **kwargs)
+
+
+def is_valid_cidr(cidr):
+    try:
+        netaddr.IPNetwork(cidr)
+        return True
+    except Exception:
+        return False

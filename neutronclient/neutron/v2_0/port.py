@@ -16,12 +16,13 @@
 
 import argparse
 
-from oslo.serialization import jsonutils
+from oslo_serialization import jsonutils
 
 from neutronclient.common import exceptions
 from neutronclient.common import utils
 from neutronclient.i18n import _
 from neutronclient.neutron import v2_0 as neutronV20
+from neutronclient.neutron.v2_0.qos import policy as qos_policy
 
 
 def _format_fixed_ips(port):
@@ -193,7 +194,7 @@ class UpdateExtraDhcpOptMixin(object):
 
 
 class CreatePort(neutronV20.CreateCommand, UpdatePortSecGroupMixin,
-                 UpdateExtraDhcpOptMixin):
+                 UpdateExtraDhcpOptMixin, qos_policy.CreateQosPolicyMixin):
     """Create a port for a given tenant."""
 
     resource = 'port'
@@ -214,8 +215,23 @@ class CreatePort(neutronV20.CreateCommand, UpdatePortSecGroupMixin,
         parser.add_argument(
             '--mac_address',
             help=argparse.SUPPRESS)
+        parser.add_argument(
+            '--vnic-type', metavar='<direct | macvtap | normal>',
+            choices=['direct', 'macvtap', 'normal'],
+            help=_('VNIC type for this port.'))
+        parser.add_argument(
+            '--vnic_type',
+            choices=['direct', 'macvtap', 'normal'],
+            help=argparse.SUPPRESS)
+        parser.add_argument(
+            '--binding-profile',
+            help=_('Custom data to be passed as binding:profile.'))
+        parser.add_argument(
+            '--binding_profile',
+            help=argparse.SUPPRESS)
         self.add_arguments_secgroup(parser)
         self.add_arguments_extradhcpopt(parser)
+        self.add_arguments_qos_policy(parser)
 
         parser.add_argument(
             'network_id', metavar='NETWORK',
@@ -232,9 +248,15 @@ class CreatePort(neutronV20.CreateCommand, UpdatePortSecGroupMixin,
             body['port'].update({'mac_address': parsed_args.mac_address})
         if parsed_args.tenant_id:
             body['port'].update({'tenant_id': parsed_args.tenant_id})
+        if parsed_args.vnic_type:
+            body['port'].update({'binding:vnic_type': parsed_args.vnic_type})
+        if parsed_args.binding_profile:
+            body['port'].update({'binding:profile':
+                                 jsonutils.loads(parsed_args.binding_profile)})
 
         self.args2body_secgroup(parsed_args, body['port'])
         self.args2body_extradhcpopt(parsed_args, body['port'])
+        self.args2body_qos_policy(parsed_args, body['port'])
 
         return body
 
@@ -246,7 +268,7 @@ class DeletePort(neutronV20.DeleteCommand):
 
 
 class UpdatePort(neutronV20.UpdateCommand, UpdatePortSecGroupMixin,
-                 UpdateExtraDhcpOptMixin):
+                 UpdateExtraDhcpOptMixin, qos_policy.UpdateQosPolicyMixin):
     """Update port's information."""
 
     resource = 'port'
@@ -263,6 +285,7 @@ class UpdatePort(neutronV20.UpdateCommand, UpdatePortSecGroupMixin,
             help=argparse.SUPPRESS)
         self.add_arguments_secgroup(parser)
         self.add_arguments_extradhcpopt(parser)
+        self.add_arguments_qos_policy(parser)
 
     def args2body(self, parsed_args):
         body = {'port': {}}
@@ -271,6 +294,9 @@ class UpdatePort(neutronV20.UpdateCommand, UpdatePortSecGroupMixin,
         if parsed_args.admin_state_up:
             body['port'].update({'admin_state_up':
                                 parsed_args.admin_state_up})
+
         self.args2body_secgroup(parsed_args, body['port'])
         self.args2body_extradhcpopt(parsed_args, body['port'])
+        self.args2body_qos_policy(parsed_args, body['port'])
+
         return body

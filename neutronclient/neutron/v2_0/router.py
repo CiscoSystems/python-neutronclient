@@ -18,7 +18,7 @@ from __future__ import print_function
 
 import argparse
 
-from oslo.serialization import jsonutils
+from oslo_serialization import jsonutils
 
 from neutronclient.common import exceptions
 from neutronclient.common import utils
@@ -91,6 +91,31 @@ class UpdateRouter(neutronV20.UpdateCommand):
     """Update router's information."""
 
     resource = 'router'
+
+    def add_known_arguments(self, parser):
+        parser.add_argument(
+            '--name',
+            help=_('Name of this router.'))
+        utils.add_boolean_argument(
+            parser, '--admin-state-up', dest='admin_state',
+            help=_('Specify the administrative state of the router'
+                   ' (True meaning "Up")'))
+        utils.add_boolean_argument(
+            parser, '--admin_state_up', dest='admin_state',
+            help=argparse.SUPPRESS)
+        utils.add_boolean_argument(
+            parser, '--distributed', dest='distributed',
+            help=_('True means this router should operate in'
+                   ' distributed mode.'))
+
+    def args2body(self, parsed_args):
+        body = {self.resource: {}}
+        if hasattr(parsed_args, 'admin_state'):
+            body[self.resource].update(
+                {'admin_state_up': parsed_args.admin_state})
+        neutronV20.update_dict(parsed_args, body[self.resource],
+                               ['name', 'distributed'])
+        return body
 
 
 class RouterInterfaceCommand(neutronV20.NeutronCommand):
@@ -209,6 +234,11 @@ class SetGatewayRouter(neutronV20.NeutronCommand):
         parser.add_argument(
             '--disable-snat', action='store_true',
             help=_('Disable source NAT on the router gateway.'))
+        parser.add_argument(
+            '--fixed-ip', action='append',
+            help=_('Desired IP and/or subnet on external network: '
+                   'subnet_id=<name_or_id>,ip_address=<ip>. '
+                   'You can repeat this option.'))
         return parser
 
     def run(self, parsed_args):
@@ -222,6 +252,17 @@ class SetGatewayRouter(neutronV20.NeutronCommand):
         router_dict = {'network_id': _ext_net_id}
         if parsed_args.disable_snat:
             router_dict['enable_snat'] = False
+        if parsed_args.fixed_ip:
+            ips = []
+            for ip_spec in parsed_args.fixed_ip:
+                ip_dict = utils.str2dict(ip_spec)
+                subnet_name_id = ip_dict.get('subnet_id')
+                if subnet_name_id:
+                    subnet_id = neutronV20.find_resourceid_by_name_or_id(
+                        neutron_client, 'subnet', subnet_name_id)
+                    ip_dict['subnet_id'] = subnet_id
+                ips.append(ip_dict)
+            router_dict['external_fixed_ips'] = ips
         neutron_client.add_gateway_router(_router_id, router_dict)
         print(_('Set gateway for router %s') % parsed_args.router,
               file=self.app.stdout)
