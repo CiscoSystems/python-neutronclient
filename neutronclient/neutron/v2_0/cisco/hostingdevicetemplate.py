@@ -49,8 +49,14 @@ class CreateHostingDeviceTemplate(neutronV20.CreateCommand):
             help=_('Name of hosting device template to create.'))
         parser.add_argument(
             '--template_id',
-            help=_('Id of hosting device template template to associate hosting device '
-                   'with.'))
+            help=_('Id of hosting device template template to associate '
+                   'hosting device with.'))
+        parser.add_argument(
+            '--disabled',
+            dest='enabled',
+            action='store_false',
+            help=_('Make the hosting device template disabled.'),
+            default=argparse.SUPPRESS)
         parser.add_argument(
             '--credential_id',
             help=_('Id of credential used by hosting device.'))
@@ -83,11 +89,14 @@ class CreateHostingDeviceTemplate(neutronV20.CreateCommand):
             help=_('Tenant allowed place service instances in the hosting '
                    'device.'))
         parser.add_argument(
-            '--disabled',
-            dest='enabled',
-            action='store_false',
-            help=_('Make the hosting device template disabled.'),
-            default=argparse.SUPPRESS)
+            '--device_driver',
+            help=_('Device driver module to use for hosting devices based on '
+                   'this template.'))
+        parser.add_argument(
+            '--plugging_driver',
+            help=_('Plugging driver module to use for hosting devices based '
+                   'on this template.'))
+
 
     def args2body(self, parsed_args):
         body = {self.resource: {'admin_state_up': parsed_args.admin_state}}

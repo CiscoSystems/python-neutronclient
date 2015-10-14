@@ -26,8 +26,8 @@ class ListHostingDevice(neutronV20.ListCommand):
     """List hosting devices that belong to a given tenant."""
 
     resource = 'hosting_device'
-    list_columns = ['id', 'template_id', 'admin_state_up', 'created_at',
-                    'status']
+    list_columns = ['id', 'name', 'template_id', 'admin_state_up',
+                    'created_at', 'status']
     pagination_support = True
     sorting_support = True
 
@@ -45,47 +45,55 @@ class CreateHostingDevice(neutronV20.CreateCommand):
 
     def add_known_arguments(self, parser):
         parser.add_argument(
-            '--template_id',
-            help=_('Id of hosting device template to associate hosting device '
-                   'with.'))
+            'name', metavar='NAME',
+            help=_('Name of hosting device to create.'))
         parser.add_argument(
-            '--credential_id',
-            help=_('Id of credential used by hosting device.'))
-        parser.add_argument(
-            '--device_id',
-            help=_('Manufacturer id of hosting device.'))
-        parser.add_argument(
-            '--device_id',
-            help=_('Manufacturer id of hosting device.'))
-        parser.add_argument(
-            '--admin_state_down',
-            dest='admin_state_up',
+            '--disabled',
+            dest='enabled',
             action='store_false',
-            help=_('Set hosting_device administratively down.'),
+            help=_('Disable the hostingdevice template.'),
             default=argparse.SUPPRESS)
         parser.add_argument(
-            '--management_ip_address',
-            help=_('IP address used for management of hosting device.'))
+            '--host_category',
+            help=_('Host category for this hosting device template. One of '
+                   'VM, Hardware, or, Network_Node.'))
         parser.add_argument(
-            '--management_port_id',
-            help=_('Neutron port used for management of hosting device.'))
+            '--service_types',
+            help=_('Service types supported by this hosting device template.'))
+        parser.add_argument(
+            '--glance_image',
+            help=_('Glance image used by this hosting device template.'))
+        parser.add_argument(
+            '--nova_flavor',
+            help=_('Nova flavor used by this hosting device template.'))
+        parser.add_argument(
+            '--default_credentials_id',
+            help=_('Id of credentials used by default for hosting devices '
+                   'based on this template.'))
+        parser.add_argument(
+            '--configuration mechanism',
+            help=_('Method used to configure hosting devices based on this '
+                   'template.'))
         parser.add_argument(
             '--protocol_port',
-            help=_('Protocol port used for management of hosting device.'))
+            help=_('TCP/UDP port used for management of hosting devices '
+                   'based on this template.'))
         parser.add_argument(
-            '--cfg_agent_id',
-            help=_('Config agent to handle the hosting device.'))
+            '--booting_time',
+            help=_('Typical time to boot hosting devices based on this '
+                   'template.'))
+        parser.add_argument(
+            '--slot_capacity',
+            help=_('Capacity (in slots) for hosting devices based on this '
+                   'template.'))
+        parser.add_argument(
+            '--desired_slot_free',
+            help=_('Number of slots to keep available in hosting devices '
+                   'based on this template.'))
         parser.add_argument(
             '--tenant_bound',
-            help=_('Tenant allowed place service instances in the hosting '
-                   'device.'))
-        parser.add_argument(
-            '--auto_delete',
-            dest='auto_delete',
-            action='store_true',
-            help=_('Automatically delete hosting device as part of '
-                   'lifecycle management.'),
-            default=argparse.SUPPRESS)
+            help=_('Tenant allowed place service instances in hosting devices '
+                   'based on this template.'))
 
     def args2body(self, parsed_args):
         body = {self.resource: {'admin_state_up': parsed_args.admin_state}}

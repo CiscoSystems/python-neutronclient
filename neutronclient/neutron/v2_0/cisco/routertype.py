@@ -54,6 +54,12 @@ class CreateRouterType(neutronV20.CreateCommand):
             help=_('Id of hosting device template to associate router type '
                    'with.'))
         parser.add_argument(
+            '--ha_enabled_by_default',
+            dest='ha_enabled_by_default',
+            action='store_true',
+            help=_('Make HA enabled for the router type.'),
+            default=argparse.SUPPRESS)
+        parser.add_argument(
             '--shared',
             dest='shared',
             action='store_true',
@@ -65,6 +71,13 @@ class CreateRouterType(neutronV20.CreateCommand):
         parser.add_argument(
             '--scheduler',
             help=_('Scheduler module to use for routers of this router type.'))
+        parser.add_argument(
+            '--driver',
+            help=_('Driver module to use for routers of this router type.'))
+        parser.add_argument(
+            '--cfg_agent_service_helper',
+            help=_('Service helper in config agent to use for routers of this '
+                   'router type.'))
         parser.add_argument(
             '--cfg_agent_driver',
             help=_('Device driver in config agent to use for routers of this '

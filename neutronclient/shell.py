@@ -333,23 +333,18 @@ COMMAND_V2 = {
         routerscheduler.RemoveRouterFromHostingDevice,
     'cisco-hosting-device-list-hosted-routers':
         routerscheduler.ListRoutersOnHostingDevice,
-    'cisco-hosting-device-list-for-router':
+    'cisco-router-list-hosting-devices':
         routerscheduler.ListHostingDeviceHostingRouter,
-    'cisco-hosting-device-template-list': (
-        hostingdevicetemplate.ListHostingDeviceTemplate
-    ),
-    'cisco-hosting-device-template-show': (
-        hostingdevicetemplate.ShowHostingDeviceTemplate
-    ),
-    'cisco-hosting-device-template-create': (
-        hostingdevicetemplate.CreateHostingDeviceTemplate
-    ),
-    'cisco-hosting-device-template-delete': (
-        hostingdevicetemplate.DeleteHostingDeviceTemplate
-    ),
-    'cisco-hosting-device-template-update': (
-        hostingdevicetemplate.UpdateHostingDeviceTemplate
-    ),
+    'cisco-hosting-device-template-list':
+        hostingdevicetemplate.ListHostingDeviceTemplate,
+    'cisco-hosting-device-template-show':
+        hostingdevicetemplate.ShowHostingDeviceTemplate,
+    'cisco-hosting-device-template-create':
+        hostingdevicetemplate.CreateHostingDeviceTemplate,
+    'cisco-hosting-device-template-delete':
+        hostingdevicetemplate.DeleteHostingDeviceTemplate,
+    'cisco-hosting-device-template-update':
+        hostingdevicetemplate.UpdateHostingDeviceTemplate,
     'cisco-network-profile-list': networkprofile.ListNetworkProfile,
     'cisco-network-profile-show': networkprofile.ShowNetworkProfile,
     'cisco-network-profile-create': networkprofile.CreateNetworkProfile,

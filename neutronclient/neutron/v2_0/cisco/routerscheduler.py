@@ -108,7 +108,7 @@ class ListHostingDeviceHostingRouter(neutronV20.ListCommand):
 
     resource = 'hosting_device'
     _formatters = {}
-    list_columns = ['id', 'status', 'admin_state_up']
+    list_columns = ['id', 'name', 'status', 'admin_state_up', 'template_id']
     unknown_parts_flag = False
 
     def get_parser(self, prog_name):
