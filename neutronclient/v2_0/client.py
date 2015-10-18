@@ -1,5 +1,5 @@
 # Copyright 2012 OpenStack Foundation.
-# Copyright 2015 Cisco Systems
+# Copyright 2015 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -436,17 +436,6 @@ class Client(ClientBase):
     qos_rule_types_path = "/qos/rule-types"
     qos_rule_type_path = "/qos/rule-types/%s"
 
-    HOSTING_DEVICES = '/hosting-devices'
-    DEVICE_L3_ROUTERS = '/hosting-device-l3-routers'
-    CFG_AGENTS = '/cfg-agents'
-    hosting_devices_path = "/dev_mgr/hosting_devices"
-    hosting_device_path = "/dev_mgr/hosting_devices/%s"
-    hosting_device_templates_path = "/dev_mgr/hosting_device_templates"
-    hosting_device_template_path = "/dev_mgr/hosting_device_templates/%s"
-    L3_ROUTER_DEVICES = '/l3-router-hosting-devices'
-    routertypes_path = "/routertypes"
-    routertype_path = "/routertypes/%s"
-
     # API has no way to report plurals, so we have to hard code them
     EXTED_PLURALS = {'routers': 'router',
                      'floatingips': 'floatingip',
@@ -482,9 +471,6 @@ class Client(ClientBase):
                      'policies': 'policy',
                      'bandwidth_limit_rules': 'bandwidth_limit_rule',
                      'rule_types': 'rule_type',
-                     'hosting_devices': 'hosting_device',
-                     'hosting_device_templates': 'hosting_device_template',
-                     'routertypes': 'routertype',
                      }
 
     @APIParamsCall
@@ -724,12 +710,6 @@ class Client(ClientBase):
         """Removes an internal network interface from the specified router."""
         return self.put((self.router_path % router) +
                         "/remove_router_interface", body=body)
-
-    @APIParamsCall
-    def get_router_interfaces(self, router, body=None):
-        """Gets the router interfaces of a specified router."""
-        return self.get((self.router_path % router) +
-                        "/get_router_interfaces", body=body)
 
     @APIParamsCall
     def add_gateway_router(self, router, body=None):
@@ -1726,144 +1706,6 @@ class Client(ClientBase):
         """Deletes a bandwidth limit rule."""
         return self.delete(self.qos_bandwidth_limit_rule_path %
                            (policy, rule))
-
-    @APIParamsCall
-    def create_hosting_device(self, body=None):
-        """Create a new hosting device."""
-        return self.post(self.hosting_devices_path, body=body)
-
-    @APIParamsCall
-    def update_hosting_device(self, hosting_device_id, body=None):
-        """Update a hosting device."""
-        return self.put(self.hosting_device_path % hosting_device_id,
-                                     body=body)
-
-    @APIParamsCall
-    def list_hosting_devices(self, retrieve_all=True, **_params):
-        """Fetch a list of all hosting devices for a tenant."""
-        return self.list('hosting_devices', self.hosting_devices_path,
-                         retrieve_all, **_params)
-
-    @APIParamsCall
-    def show_hosting_device(self, hosting_device_id, **_params):
-        """Fetch information of a certain hosting device."""
-        return self.get(self.hosting_device_path % hosting_device_id,
-                        params=_params)
-
-    @APIParamsCall
-    def delete_hosting_device(self, hosting_device_id):
-        """Delete the specified hosting device."""
-        return self.delete(self.hosting_device_path % hosting_device_id)
-
-    @APIParamsCall
-    def create_hosting_device_template(self, body=None):
-        """Create a new hosting device template."""
-        return self.post(self.hosting_device_templates_path, body=body)
-
-    @APIParamsCall
-    def update_hosting_device_template(self, hosting_device_template_id,
-                                       body=None):
-        """Update a hosting device template."""
-        return self.put(self.hosting_device_template_path %
-                        hosting_device_template_id, body=body)
-
-    @APIParamsCall
-    def list_hosting_device_templates(self, retrieve_all=True, **_params):
-        """Fetch a list of all hosting device templates for a tenant."""
-        return self.list('hosting_device_templates',
-                         self.hosting_device_templates_path, retrieve_all,
-                         **_params)
-
-    @APIParamsCall
-    def show_hosting_device_template(self, hosting_device_template_id,
-                                     **_params):
-        """Fetch information of a certain hosting device template."""
-        return self.get(self.hosting_device_template_path %
-                        hosting_device_template_id, params=_params)
-
-    @APIParamsCall
-    def delete_hosting_device_template(self, hosting_device_template_id):
-        """Delete the specified hosting device template."""
-        return self.delete(self.hosting_device_template_path %
-                           hosting_device_template_id)
-
-    @APIParamsCall
-    def create_routertype(self, body=None):
-        """Create a new routertype."""
-        return self.post(self.routertypes_path, body=body)
-
-    @APIParamsCall
-    def update_routertype(self, routertype_id, body=None):
-        """Update a routertype."""
-        return self.put(self.routertype_path % routertype_id,  body=body)
-
-    @APIParamsCall
-    def list_routertypes(self, retrieve_all=True, **_params):
-        """Fetch a list of all routertypes for a tenant."""
-        return self.list('routertypes', self.routertypes_path,
-                         retrieve_all, **_params)
-
-    @APIParamsCall
-    def show_routertype(self, routertype_id, **_params):
-        """Fetch information of a certain routertype."""
-        return self.get(self.routertype_path % routertype_id, params=_params)
-
-    @APIParamsCall
-    def delete_routertype(self, routertype_id):
-        """Delete the specified routertype."""
-        return self.delete(self.routertype_path % routertype_id)
-
-    @APIParamsCall
-    def list_hosting_devices_hosting_routers(self, router_id, **_params):
-        """Fetches a list of hosting devices hosting a router."""
-        return self.get((self.router_path + self.L3_ROUTER_DEVICES) %
-                        router_id, params=_params)
-
-    @APIParamsCall
-    def list_routers_on_hosting_device(self, hosting_device_id, **_params):
-        """Fetches a list of hosting devices hosting a router."""
-        return self.get((self.hosting_device_path + self.DEVICE_L3_ROUTERS) %
-                        hosting_device_id, params=_params)
-
-    @APIParamsCall
-    def add_router_to_hosting_device(self, hosting_device_id, body):
-        """Adds a router to hosting device."""
-        return self.post((self.hosting_device_path + self.DEVICE_L3_ROUTERS) %
-                         hosting_device_id, body=body)
-
-    @APIParamsCall
-    def remove_router_from_hosting_device(self, hosting_device_id, router_id):
-        """Remove a router from hosting_device."""
-        return self.delete((self.hosting_device_path + self.DEVICE_L3_ROUTERS
-                            + "/%s") % (hosting_device_id, router_id))
-
-    @APIParamsCall
-    def list_config_agents_handling_hosting_device(self, hosting_device_id,
-                                                   **_params):
-        """Fetches a list of config agents handling a hosting device."""
-        return self.get((self.router_path + self.CFG_AGENTS) %
-                        hosting_device_id, params=_params)
-
-    @APIParamsCall
-    def list_hosting_device_handled_by_config_agent(self, hosting_device_id,
-                                                    **_params):
-        """Fetches a list of hosting devices handled by a config agent."""
-        return self.get((self.agent_path + self.HOSTING_DEVICES) %
-                        hosting_device_id, params=_params)
-
-    @APIParamsCall
-    def associate_hosting_device_with_config_agent(self, hosting_device_id,
-                                                   body):
-        """Associates a hosting device with a config agent."""
-        return self.post((self.agent_path + self.HOSTING_DEVICES) %
-                         hosting_device_id, body=body)
-
-    @APIParamsCall
-    def disassociate_hosting_device_with_config_agent(self, config_agent_id,
-                                                      hosting_device_id):
-        """Disassociates a hosting_device with a config agent."""
-        return self.delete((self.agent_path + self.HOSTING_DEVICES + "/%s") % (
-            config_agent_id, hosting_device_id))
 
     def __init__(self, **kwargs):
         """Initialize a new client for the Neutron v2.0 API."""
