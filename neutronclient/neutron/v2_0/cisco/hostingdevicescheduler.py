@@ -28,8 +28,8 @@ CFG_AGENT_HOSTING_DEVICES = '/cfg-agent-hosting-devices'
 class HostingDeviceHandledByConfigAgent(extension.NeutronClientExtension):
     resource = HOSTING_DEVICE
     resource_plural = '%ss' % resource
-    object_path = '/%s' % resource_plural
-    resource_path = '/%s/%%s' % resource_plural
+    object_path = '/dev_mgr/%s' % resource_plural
+    resource_path = '/dev_mgr/%s/%%s' % resource_plural
     versions = ['2.0']
     allow_names = True
 
@@ -40,7 +40,7 @@ class HostingDeviceAssociateWithConfigAgent(extension.ClientExtensionCreate,
     shell_command = 'cisco-config-agent-associate-hosting-device'
 
     def get_parser(self, prog_name):
-        parser = super(HostingDeviceAssociateWithConfigAgent,self).get_parser(
+        parser = super(HostingDeviceAssociateWithConfigAgent, self).get_parser(
             prog_name)
         parser.add_argument(
             'config_agent_id',
@@ -56,13 +56,14 @@ class HostingDeviceAssociateWithConfigAgent(extension.ClientExtensionCreate,
         neutron_client.format = parsed_args.request_format
         _id_hd = neutronV20.find_resourceid_by_name_or_id(
             neutron_client, 'hosting_device', parsed_args.hosting_device)
-        res = self.associate_hosting_device_with_config_agent(
+        self.associate_hosting_device_with_config_agent(
             neutron_client, parsed_args.config_agent_id,
             {'hosting_device_id': _id_hd})
-        print(_('Associated hosting device \'%s\' with Cisco configuration '
-                'agent \'%s\'') % (parsed_args.hosting_device,
-                                   parsed_args.config_agent_id),
-              file=self.app.stdout, end='')
+        print(_('Associated hosting device \'%(hd)s\' with Cisco '
+                'configuration agent \'%(agent)s\'') % {
+            'hd': parsed_args.hosting_device,
+            'agent': parsed_args.config_agent_id}, file=self.app.stdout,
+            end='')
         return [], []
 
     def associate_hosting_device_with_config_agent(
@@ -71,6 +72,7 @@ class HostingDeviceAssociateWithConfigAgent(extension.ClientExtensionCreate,
         return client.post((ConfigAgentHandlingHostingDevice.resource_path +
                             CFG_AGENT_HOSTING_DEVICES) % config_agent_id,
                            body=body)
+
 
 class HostingDeviceDisassociateFromConfigAgent(
         extension.ClientExtensionCreate, HostingDeviceHandledByConfigAgent):
@@ -94,12 +96,13 @@ class HostingDeviceDisassociateFromConfigAgent(
         neutron_client.format = parsed_args.request_format
         _id_hd = neutronV20.find_resourceid_by_name_or_id(
             neutron_client, 'hosting_device', parsed_args.hosting_device)
-        res = self.disassociate_hosting_device_with_config_agent(
+        self.disassociate_hosting_device_with_config_agent(
             neutron_client, parsed_args.config_agent_id, _id_hd)
-        print(_('Disassociated hosting device \'%s\' from Cisco '
-                'configuration agent \'%s\'') % (
-              parsed_args.hosting_device, parsed_args.config_agent_id),
-              file=self.app.stdout, end='')
+        print(_('Disassociated hosting device \'%(hd)s\' from Cisco '
+                'configuration agent \'%(agent)s\'') % {
+            'hd': parsed_args.hosting_device,
+            'agent': parsed_args.config_agent_id}, file=self.app.stdout,
+            end='')
         return [], []
 
     def disassociate_hosting_device_with_config_agent(
@@ -169,15 +172,13 @@ class ConfigAgentHandlingHostingDeviceList(extension.ClientExtensionList,
     def call_server(self, neutron_client, search_opts, parsed_args):
         _id = neutronV20.find_resourceid_by_name_or_id(
             neutron_client, 'hosting_device', parsed_args.hosting_device)
-        search_opts['hosting_device'] = _id
         data = self.list_config_agents_handling_hosting_device(
-            neutron_client, search_opts['hosting_device'], **search_opts)
+            neutron_client, _id, **search_opts)
         return data
 
     def list_config_agents_handling_hosting_device(
-            self, client, hosting_device_id,**_params):
+            self, client, hosting_device_id, **_params):
         """Fetches a list of config agents handling a hosting device."""
-        #resource_path = '/dev_mgr/hosting_devices/%s'
-        resource_path = '/hosting_devices/%s'
+        resource_path = '/dev_mgr/hosting_devices/%s'
         return client.get((resource_path + HOSTING_DEVICE_CFG_AGENTS) %
                           hosting_device_id, params=_params)

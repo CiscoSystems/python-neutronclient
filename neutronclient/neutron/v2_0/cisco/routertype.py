@@ -78,7 +78,7 @@ class RouterTypeList(extension.ClientExtensionList, RouterType):
     """List router types that belong to a given tenant."""
 
     shell_command = 'cisco-router-type-list'
-    list_columns = ['id', 'name', 'description']
+    list_columns = ['id', 'name', 'description', 'template_id']
     pagination_support = True
     sorting_support = True
 
@@ -99,6 +99,7 @@ class RouterTypeCreate(extension.ClientExtensionCreate, RouterType):
         parser.add_argument(
             '--id',
             help=_('Id for this router type.'))
+
         parser.add_argument(
             'template_id', metavar='TEMPLATE',
             help=_('Hosting device template to associate router type with.'))
@@ -133,8 +134,8 @@ class RouterTypeCreate(extension.ClientExtensionCreate, RouterType):
             'cfg_agent_service_helper': parsed_args.cfg_agent_service_helper,
             'cfg_agent_driver': parsed_args.cfg_agent_driver}}
         _updatable_args2body(parsed_args, body)
-        if parsed_args.id:
-            body[self.resource].update({'id': parsed_args.id})
+        neutronV20.update_dict(parsed_args, body[self.resource],
+                               ['id', 'tenant_id'])
         return body
 
 

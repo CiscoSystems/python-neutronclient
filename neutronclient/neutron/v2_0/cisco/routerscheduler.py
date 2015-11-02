@@ -20,6 +20,7 @@ from neutronclient.common import extension
 from neutronclient.i18n import _
 from neutronclient.neutron import v2_0 as neutronV20
 from neutronclient.neutron.v2_0 import router
+
 from neutronclient.neutron.v2_0.cisco import hostingdevice
 
 
@@ -60,10 +61,10 @@ class AddRouterToHostingDevice(extension.ClientExtensionCreate,
             neutron_client, 'hosting_device', parsed_args.hosting_device)
         _id_r = neutronV20.find_resourceid_by_name_or_id(
             neutron_client, 'router', parsed_args.router)
-        res = self.add_router_to_hosting_device(neutron_client, _id_hd,
-                                                {'router_id': _id_r})
-        print(_('Added router \'%s\' to hosting device \'%s\'') % (
-            parsed_args.router, parsed_args.hosting_device),
+        self.add_router_to_hosting_device(neutron_client, _id_hd,
+                                          {'router_id': _id_r})
+        print(_('Added router \'%(router)s\' to hosting device \'%(hd)s\'') % {
+            'router': parsed_args.router, 'hd': parsed_args.hosting_device},
             file=self.app.stdout, end='')
         return [], []
 
@@ -99,11 +100,11 @@ class RemoveRouterFromHostingDevice(extension.ClientExtensionCreate,
             neutron_client, 'hosting_device', parsed_args.hosting_device)
         _id_r = neutronV20.find_resourceid_by_name_or_id(
             neutron_client, 'router', parsed_args.router)
-        res = self.remove_router_from_hosting_device(neutron_client, _id_hd,
-                                                     _id_r)
-        print(_('Removed router \'%s\' from hosting device \'%s\'') % (
-              parsed_args.router, parsed_args.hosting_device),
-              file=self.app.stdout, end='')
+        self.remove_router_from_hosting_device(neutron_client, _id_hd, _id_r)
+        print(_('Removed router \'%(router)s\' from hosting device \'%(hd)s\'')
+              % {'router': parsed_args.router,
+                 'hd': parsed_args.hosting_device}, file=self.app.stdout,
+              end='')
         return [], []
 
     def remove_router_from_hosting_device(self, client, hosting_device_id,
@@ -173,9 +174,8 @@ class HostingDeviceHostingRouterList(extension.ClientExtensionList,
     def call_server(self, neutron_client, search_opts, parsed_args):
         _id = neutronV20.find_resourceid_by_name_or_id(
             neutron_client, 'router', parsed_args.router)
-        search_opts['router'] = _id
-        data = self.list_hosting_devices_hosting_routers(
-            neutron_client, search_opts['router'], **search_opts)
+        data = self.list_hosting_devices_hosting_routers(neutron_client, _id,
+                                                         **search_opts)
         return data
 
     def list_hosting_devices_hosting_routers(self, client, router_id,

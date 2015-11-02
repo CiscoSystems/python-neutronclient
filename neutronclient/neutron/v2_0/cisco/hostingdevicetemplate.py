@@ -82,20 +82,21 @@ def _add_updatable_args(parser):
     parser.add_argument(
         '--tenant-bound',
         help=_('Tenant allowed place service instances in hosting devices '
-               'based on this template.'))
+               'based on this template.'),
+        default=argparse.SUPPRESS)
     parser.add_argument(
         '--tenant_bound',
-        help=argparse.SUPPRESS)
+        help=argparse.SUPPRESS,
+        default=argparse.SUPPRESS)
 
 
 def _updatable_args2body(parsed_args, body):
-    neutronV20.update_dict(parsed_args, body[TEMPLATE],
-                               ['name', 'enabled', 'service_types', 'image',
-                                'flavor', 'default_credentials_id',
-                                'configuration_mechanism', 'protocol_port',
-                                'booting_time'])
+    neutronV20.update_dict(parsed_args, body[TEMPLATE], [
+        'name', 'enabled', 'service_types', 'image', 'flavor',
+        'default_credentials_id', 'configuration_mechanism', 'protocol_port',
+        'booting_time'])
     # handle tenant_bound separately as we want to allow it to be set to None
-    if parsed_args.tenant_bound:
+    if hasattr(parsed_args, 'tenant_bound'):
         if (isinstance(parsed_args.tenant_bound, basestring) and
                 parsed_args.tenant_bound.lower() == 'none'):
             parsed_args.tenant_bound = None
@@ -122,14 +123,14 @@ class HostingDeviceTemplateList(extension.ClientExtensionList,
     sorting_support = True
 
 
-class HostingDeviceTemplateShow(extension.ClientExtensionList,
+class HostingDeviceTemplateShow(extension.ClientExtensionShow,
                                 HostingDeviceTemplate):
     """Show information of a given hosting device template."""
 
     shell_command = 'cisco-hosting-device-template-show'
 
 
-class HostingDeviceTemplateCreate(extension.ClientExtensionList,
+class HostingDeviceTemplateCreate(extension.ClientExtensionCreate,
                                   HostingDeviceTemplate):
     """Create a hosting device template for a given tenant."""
 
@@ -182,20 +183,20 @@ class HostingDeviceTemplateCreate(extension.ClientExtensionList,
                                 'host_category': parsed_args.host_category}}
         _updatable_args2body(parsed_args, body)
         neutronV20.update_dict(parsed_args, body[self.resource],
-                               ['id', 'slot_capacity', 'desired_slots_free',
-                                'device_driver', 'plugging_driver'])
+                               ['id', 'tenant_id', 'slot_capacity',
+                                'desired_slots_free', 'device_driver',
+                                'plugging_driver'])
         return body
 
 
-
-class HostingDeviceTemplateDelete(extension.ClientExtensionList,
+class HostingDeviceTemplateDelete(extension.ClientExtensionDelete,
                                   HostingDeviceTemplate):
     """Delete a given hosting device template."""
 
     shell_command = 'cisco-hosting-device-template-delete'
 
 
-class HostingDeviceTemplateUpdate(extension.ClientExtensionList,
+class HostingDeviceTemplateUpdate(extension.ClientExtensionUpdate,
                                   HostingDeviceTemplate):
 
     """Update hosting device template's information."""

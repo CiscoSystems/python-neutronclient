@@ -24,12 +24,16 @@ from neutronclient.neutron import v2_0 as neutronV20
 
 
 DEVICE = 'hosting_device'
+HOSTING_DEVICE_CONFIG = '/get_hosting_device_config'
 
 
 def _add_updatable_args(parser):
     parser.add_argument(
         '--credentials-id',
         help=_('Id of credentials used by this hosting device.'))
+    parser.add_argument(
+        '--credentials_id',
+        help=argparse.SUPPRESS)
     parser.add_argument(
         '--name',
         help=_('Name of this hosting device'))
@@ -43,24 +47,38 @@ def _add_updatable_args(parser):
         '--device_id',
         help=argparse.SUPPRESS)
     parser.add_argument(
+        '--management-ip-address',
+        help=_('IP address used for management of hosting device.'))
+    parser.add_argument(
+        '--management_ip_address',
+        help=argparse.SUPPRESS)
+    parser.add_argument(
+        '--protocol-port',
+        help=_('Protocol port used for management of hosting device.'))
+    parser.add_argument(
+        '--protocol_port',
+        help=argparse.SUPPRESS)
+    parser.add_argument(
         '--admin-state-down',
         dest='admin_state_up',
         action='store_false',
         help=_('Set hosting device administratively down.'),
-        default=argparse.SUPPRESS)
+        default=argparse.SUPPRESS,)
     parser.add_argument(
         '--admin_state_down',
         dest='admin_state_up',
         action='store_false',
         help=argparse.SUPPRESS,
-        default=argparse.SUPPRESS)
+        default=argparse.SUPPRESS,)
     parser.add_argument(
         '--tenant-bound',
         help=_('Tenant allowed place service instances in the hosting '
-               'device.'))
+               'device.'),
+        default=argparse.SUPPRESS)
     parser.add_argument(
         '--tenant_bound',
-        help=argparse.SUPPRESS)
+        help=argparse.SUPPRESS,
+        default=argparse.SUPPRESS)
     parser.add_argument(
         '--auto-delete',
         dest='auto_delete',
@@ -77,11 +95,12 @@ def _add_updatable_args(parser):
 
 
 def _updatable_args2body(parsed_args, body):
-    neutronV20.update_dict(parsed_args, body[DEVICE],
-                               ['credentials_id', 'name', 'description',
-                                'device_id', 'admin_state_up', 'auto_delete'])
+    neutronV20.update_dict(parsed_args, body[DEVICE], [
+        'credentials_id', 'name', 'description', 'device_id',
+        'management_ip_address', 'protocol_port', 'admin_state_up',
+        'auto_delete'])
     # handle tenant_bound separately as we want to allow it to be set to None
-    if parsed_args.tenant_bound:
+    if hasattr(parsed_args, 'tenant_bound'):
         if (isinstance(parsed_args.tenant_bound, basestring) and
                 parsed_args.tenant_bound.lower() == 'none'):
             parsed_args.tenant_bound = None
@@ -101,8 +120,7 @@ class HostingDeviceList(extension.ClientExtensionList, HostingDevice):
     """List hosting devices that belong to a given tenant."""
 
     shell_command = 'cisco-hosting-device-list'
-    list_columns = ['id', 'name', 'template_id', 'admin_state_up',
-                    'created_at', 'status']
+    list_columns = ['id', 'name', 'template_id', 'admin_state_up', 'status']
     pagination_support = True
     sorting_support = True
 
@@ -119,30 +137,47 @@ class HostingDeviceCreate(extension.ClientExtensionCreate, HostingDevice):
     shell_command = 'cisco-hosting-device-create'
 
     def add_known_arguments(self, parser):
+        _add_updatable_args(parser)
         parser.add_argument(
-            '--template_id',
-            help=_('Id of hosting device template template to associate '
-                   'hosting device with.'))
+            '--id',
+            help=_('Id for this hosting device.'))
         parser.add_argument(
-            '--management_ip_address',
-            help=_('IP address used for management of hosting device.'))
-        parser.add_argument(
-            '--management_port_id',
+            '--management-port',
             help=_('Neutron port used for management of hosting device.'))
         parser.add_argument(
-            '--protocol_port',
-            help=_('Protocol port used for management of hosting device.'))
+            '--management_port',
+            help=argparse.SUPPRESS)
+        parser.add_argument(
+            '--cfg-agent-id',
+            help=_('Config agent to handle the hosting device.'))
         parser.add_argument(
             '--cfg_agent_id',
-            help=_('Config agent to handle the hosting device.'))
+            help=argparse.SUPPRESS)
+
         parser.add_argument(
             'name', metavar='NAME',
             help=_('Name of hosting device to create.'))
+        parser.add_argument(
+            'template_id', metavar='TEMPLATE',
+            help=_('Hosting device template template to associate '
+                   'hosting device with.'))
 
     def args2body(self, parsed_args):
-        body = {self.resource: {'admin_state_up': parsed_args.admin_state}}
+        client = self.get_client()
+        _template_id = neutronV20.find_resourceid_by_name_or_id(
+            client, 'hosting_device_template', parsed_args.template_id)
+        body = {self.resource: {
+            'name': parsed_args.name, 'template_id': _template_id,
+            'admin_state_up': True}}
+        _updatable_args2body(parsed_args, body)
         neutronV20.update_dict(parsed_args, body[self.resource],
-                               ['name', 'tenant_id', 'distributed', 'ha'])
+                               ['id', 'tenant_id', 'management_port_id',
+                                'cfg_agent_id'])
+        if (hasattr(parsed_args, 'management_port') and
+                parsed_args.management_port):
+            _port_id = neutronV20.find_resourceid_by_name_or_id(
+                client, 'port', parsed_args.management_port)
+            body[self.resource]['management_port_id'] = _port_id
         return body
 
 
@@ -194,3 +229,29 @@ class HostingDeviceUpdate(extension.ClientExtensionUpdate, HostingDevice):
         body = {self.resource: {}}
         _updatable_args2body(parsed_args, body)
         return body
+
+
+class HostingDeviceGetConfig(extension.ClientExtensionShow, HostingDevice):
+    """Fetch running of a given hosting device."""
+
+    shell_command = 'cisco-hosting-device-get-config'
+
+    def run(self, parsed_args):
+        data = self.get_data(parsed_args)
+        # just do raw text output
+        if data:
+            self.app.stdout.write(str(data) + '\n')
+        return 0
+
+    def get_data(self, parsed_args):
+        self.log.debug('run(%s)' % parsed_args)
+        neutron_client = self.get_client()
+        neutron_client.format = parsed_args.request_format
+        _id_hd = neutronV20.find_resourceid_by_name_or_id(
+            neutron_client, 'hosting_device', parsed_args.id)
+        return self.get_hosting_device_config(neutron_client, _id_hd)
+
+    def get_hosting_device_config(self, client, hosting_device_id):
+        """Get config of hosting_device."""
+        return client.get((self.resource_path + HOSTING_DEVICE_CONFIG) %
+                          hosting_device_id)
