@@ -47,6 +47,11 @@ from neutronclient.common import utils
 from neutronclient.i18n import _
 from neutronclient.neutron.v2_0 import agent
 from neutronclient.neutron.v2_0 import agentscheduler
+from neutronclient.neutron.v2_0.cisco import hostingdevice
+from neutronclient.neutron.v2_0.cisco import hostingdevicescheduler
+from neutronclient.neutron.v2_0.cisco import hostingdevicetemplate
+from neutronclient.neutron.v2_0.cisco import routerscheduler
+from neutronclient.neutron.v2_0.cisco import routertype
 from neutronclient.neutron.v2_0 import credential
 from neutronclient.neutron.v2_0 import extension
 from neutronclient.neutron.v2_0 import floatingip
@@ -286,10 +291,47 @@ COMMAND_V2 = {
     'firewall-create': firewall.CreateFirewall,
     'firewall-update': firewall.UpdateFirewall,
     'firewall-delete': firewall.DeleteFirewall,
+    'cisco-configagent-hosting-device-associate':
+        hostingdevicescheduler.HostingDeviceAssociateWithConfigAgent,
+    'cisco-configagent-hosting-device-disassociate':
+        hostingdevicescheduler.HostingDeviceDisassociateFromConfigAgent,
+    'cisco-configagent-list-associated-hosting-devices':
+        hostingdevicescheduler.HostingDeviceHandledByConfigAgentList,
+    'cisco-configagent-list-for-hosting-device':
+        hostingdevicescheduler.ConfigAgentHandlingHostingDeviceList,
     'cisco-credential-list': credential.ListCredential,
     'cisco-credential-show': credential.ShowCredential,
     'cisco-credential-create': credential.CreateCredential,
     'cisco-credential-delete': credential.DeleteCredential,
+    'cisco-hosting-device-list': hostingdevice.ListHostingDevice,
+    'cisco-hosting-device-show': hostingdevice.ShowHostingDevice,
+    'cisco-hosting-device-create': hostingdevice.CreateHostingDevice,
+    'cisco-hosting-device-delete': hostingdevice.DeleteHostingDevice,
+    'cisco-hosting-device-update': hostingdevice.UpdateHostingDevice,
+    'cisco-hosting-device-get-config': hostingdevice.HostingDeviceGetConfig,
+    'cisco-hosting-device-router-add':
+        routerscheduler.AddRouterToHostingDevice,
+    'cisco-hosting-device-router-remove':
+        routerscheduler.RemoveRouterFromHostingDevice,
+    'cisco-hosting-device-list-hosted-routers':
+        routerscheduler.ListRoutersOnHostingDevice,
+    'cisco-router-list-hosting-devices':
+        routerscheduler.ListHostingDeviceHostingRouter,
+    'cisco-hosting-device-template-list': (
+        hostingdevicetemplate.ListHostingDeviceTemplate
+    ),
+    'cisco-hosting-device-template-show': (
+        hostingdevicetemplate.ShowHostingDeviceTemplate
+    ),
+    'cisco-hosting-device-template-create': (
+        hostingdevicetemplate.CreateHostingDeviceTemplate
+    ),
+    'cisco-hosting-device-template-delete': (
+        hostingdevicetemplate.DeleteHostingDeviceTemplate
+    ),
+    'cisco-hosting-device-template-update': (
+        hostingdevicetemplate.UpdateHostingDeviceTemplate
+    ),
     'cisco-network-profile-list': networkprofile.ListNetworkProfile,
     'cisco-network-profile-show': networkprofile.ShowNetworkProfile,
     'cisco-network-profile-create': networkprofile.CreateNetworkProfile,
@@ -298,6 +340,11 @@ COMMAND_V2 = {
     'cisco-policy-profile-list': policyprofile.ListPolicyProfile,
     'cisco-policy-profile-show': policyprofile.ShowPolicyProfile,
     'cisco-policy-profile-update': policyprofile.UpdatePolicyProfile,
+    'cisco-routertype-list': routertype.ListRouterType,
+    'cisco-routertype-show': routertype.ShowRouterType,
+    'cisco-routertype-create': routertype.CreateRouterType,
+    'cisco-routertype-delete': routertype.DeleteRouterType,
+    'cisco-routertype-update': routertype.UpdateRouterType,
     'ipsec-site-connection-list': (
         ipsec_site_connection.ListIPsecSiteConnection
     ),
