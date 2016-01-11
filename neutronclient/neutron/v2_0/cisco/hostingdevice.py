@@ -222,7 +222,7 @@ class UpdateHostingDevice(HostingDevice, neutronV20.UpdateCommand):
 
 
 class HostingDeviceGetConfig(HostingDevice, neutronV20.ShowCommand):
-    """Fetch running of a given hosting device."""
+    """Fetch running config of a given hosting device."""
 
     def run(self, parsed_args):
         data = self.get_data(parsed_args)

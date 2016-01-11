@@ -31,6 +31,7 @@ class HostingDeviceHandledByConfigAgent(object):
 
 class HostingDeviceAssociateWithConfigAgent(HostingDeviceHandledByConfigAgent,
                                             neutronV20.NeutronCommand):
+    """Associate a hosting device with a given config agent."""
 
     def get_parser(self, prog_name):
         parser = super(HostingDeviceAssociateWithConfigAgent, self).get_parser(
@@ -61,6 +62,7 @@ class HostingDeviceAssociateWithConfigAgent(HostingDeviceHandledByConfigAgent,
 
 class HostingDeviceDisassociateFromConfigAgent(
         HostingDeviceHandledByConfigAgent, neutronV20.NeutronCommand):
+    """Disassociate a hosting device from a given config agent."""
 
     def get_parser(self, prog_name):
         parser = super(HostingDeviceDisassociateFromConfigAgent,
@@ -91,6 +93,8 @@ class HostingDeviceDisassociateFromConfigAgent(
 
 class HostingDeviceHandledByConfigAgentList(HostingDeviceHandledByConfigAgent,
                                             neutronV20.ListCommand):
+    """List hosting devices associated with the given config agent."""
+
     list_columns = ['id', 'name', 'admin_state_up', 'template_id']
 
     def get_parser(self, prog_name):
@@ -118,6 +122,7 @@ class ConfigAgentHandlingHostingDevice(object):
 
 class ConfigAgentHandlingHostingDeviceList(ConfigAgentHandlingHostingDevice,
                                            neutronV20.ListCommand):
+    """List config agent that handles the given hosting device."""
 
     list_columns = ['id', 'alive', 'agent_type', 'admin_state_up', 'host']
 
